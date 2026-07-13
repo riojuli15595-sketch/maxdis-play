@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer Display Barang</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
+        .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input { padding: 15px; width: 90%; font-size: 18px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 15px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #timerDisplay { font-size: 50px; margin: 20px 0; font-weight: bold; color: #333; }
+        #targetInfo { font-size: 18px; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Timer Display</h2>
+    <input type="number" id="jumlah" placeholder="Masukkan total barang">
+    <br>
+    <button onclick="mulaiTimer()">Mulai Timer</button>
+    
+    <div id="timerDisplay">00:00</div>
+    <div id="targetInfo">Target selesai: -</div>
+</div>
+
+<script>
+    let interval;
+    function mulaiTimer() {
+        clearInterval(interval);
+        let jml = document.getElementById('jumlah').value;
+        let totalDetik = jml * 9; // 9 detik per barang
+        
+        let target = new Date(new Date().getTime() + totalDetik * 1000);
+        document.getElementById('targetInfo').innerHTML = 
+            "Target selesai: " + target.getHours() + ":" + String(target.getMinutes()).padStart(2, '0');
+
+        let sisa = totalDetik;
+        interval = setInterval(() => {
+            let m = Math.floor(sisa / 60);
+            let s = sisa % 60;
+            document.getElementById('timerDisplay').innerHTML = 
+                String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
+            
+            if (sisa <= 0) {
+                clearInterval(interval);
+                alert("WAKTU HABIS!");
+                bunyikanAlarm();
+            }
+            sisa--;
+        }, 1000);
+    }
+
+    function bunyikanAlarm() {
+        let context = new (window.AudioContext || window.webkitAudioContext)();
+        let osc = context.createOscillator();
+        osc.connect(context.destination);
+        osc.start();
+        setTimeout(() => osc.stop(), 3000);
+    }
+</script>
+</body>
+</html>

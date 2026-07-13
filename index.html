@@ -34,17 +34,22 @@
     
     const jadwalMakdis = ["03:00", "09:00", "13:00", "17:00", "20:00"];
 
-    // Fitur Pengecekan Jam Makdis
+    // Fitur Pengecekan Jam Makdis (Versi Pasti Bunyi)
     setInterval(() => {
         let sekarang = new Date();
         let jamMenit = String(sekarang.getHours()).padStart(2, '0') + ":" + 
                        String(sekarang.getMinutes()).padStart(2, '0');
         
+        // Cek jika jam sekarang ada di daftar jadwal
         if (jadwalMakdis.includes(jamMenit)) {
-            if (sekarang.getSeconds() === 0) { // Bunyi tepat saat masuk jam tsb
-                alert("WAKTUNYA MAKDIS! Segera buka aplikasi.");
+            // Kita beri penanda agar tidak bunyi terus menerus selama 1 menit
+            if (!window.sudahBunyi) {
                 audioAlarm.play();
+                alert("WAKTUNYA MAKDIS! Segera buka aplikasi.");
+                window.sudahBunyi = true; // Kunci agar hanya bunyi sekali
             }
+        } else {
+            window.sudahBunyi = false; // Reset agar bisa bunyi lagi di jadwal berikutnya
         }
     }, 1000);
 

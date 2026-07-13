@@ -9,8 +9,8 @@
         .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         input { padding: 15px; width: 90%; font-size: 18px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
         button { padding: 15px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #timerDisplay { font-size: 50px; margin: 20px 0; font-weight: bold; color: #333; }
-        #targetInfo { font-size: 18px; color: #666; }
+        #timerDisplay { font-size: 60px; margin: 20px 0; font-weight: bold; color: #333; }
+        #targetInfo { font-size: 18px; color: #666; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -27,10 +27,29 @@
 
 <script>
     let interval;
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function bunyikanAlarm(tipe) {
+        let oscillator = audioCtx.createOscillator();
+        oscillator.connect(audioCtx.destination);
+        
+        if (tipe === 'peringatan') {
+            // Bunyi singkat 2 kali (untuk detik ke-5)
+            oscillator.frequency.value = 440;
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), 200);
+        } else {
+            // Bunyi panjang (untuk detik ke-0)
+            oscillator.frequency.value = 880;
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), 1500);
+        }
+    }
+
     function mulaiTimer() {
         clearInterval(interval);
         let jml = document.getElementById('jumlah').value;
-        let totalDetik = jml * 9; // 9 detik per barang
+        let totalDetik = jml * 9; 
         
         let target = new Date(new Date().getTime() + totalDetik * 1000);
         document.getElementById('targetInfo').innerHTML = 
@@ -43,21 +62,18 @@
             document.getElementById('timerDisplay').innerHTML = 
                 String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
             
+            // Peringatan di detik ke-5
+            if (sisa === 5) {
+                bunyikanAlarm('peringatan');
+            }
+            
+            // Selesai di detik ke-0
             if (sisa <= 0) {
                 clearInterval(interval);
-                alert("WAKTU HABIS!");
-                bunyikanAlarm();
+                bunyikanAlarm('selesai');
             }
             sisa--;
         }, 1000);
-    }
-
-    function bunyikanAlarm() {
-        let context = new (window.AudioContext || window.webkitAudioContext)();
-        let osc = context.createOscillator();
-        osc.connect(context.destination);
-        osc.start();
-        setTimeout(() => osc.stop(), 3000);
     }
 </script>
 </body>

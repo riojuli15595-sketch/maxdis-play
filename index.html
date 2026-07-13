@@ -29,46 +29,54 @@
 
 <script>
     let interval;
-    // Ganti 'alarm.mp3' dengan nama file Anda, pastikan file diupload di GitHub
     let audioAlarm = new Audio('alarm.mp3'); 
-    
-    const jadwalMakdis = ["03:00", "09:00", "13:00", "17:00", "20:40"];
+    const jadwalMakdis = ["03:00", "09:00", "13:00", "17:00", "20:50"];
 
-    // Fitur Pengecekan Jam Makdis (Versi Pasti Bunyi)
+    // Minta izin notifikasi saat aplikasi dibuka
+    if (Notification.permission !== 'granted') {
+        Notification.requestPermission();
+    }
+
+    function kirimNotifikasi() {
+        if (Notification.permission === 'granted') {
+            new Notification("WAKTUNYA MAKDIS!", {
+                body: "Segera buka aplikasi untuk mulai bekerja.",
+                icon: 'https://cdn-icons-png.flaticon.com/512/1090/1090956.png'
+            });
+        }
+        audioAlarm.play();
+    }
+
+    // Pengecekan Jam Makdis
     setInterval(() => {
         let sekarang = new Date();
         let jamMenit = String(sekarang.getHours()).padStart(2, '0') + ":" + 
                        String(sekarang.getMinutes()).padStart(2, '0');
         
-        // Cek jika jam sekarang ada di daftar jadwal
         if (jadwalMakdis.includes(jamMenit)) {
-            // Kita beri penanda agar tidak bunyi terus menerus selama 1 menit
             if (!window.sudahBunyi) {
-                audioAlarm.play();
-                alert("WAKTUNYA MAKDIS! Segera buka aplikasi.");
-                window.sudahBunyi = true; // Kunci agar hanya bunyi sekali
+                kirimNotifikasi();
+                window.sudahBunyi = true;
             }
         } else {
-            window.sudahBunyi = false; // Reset agar bisa bunyi lagi di jadwal berikutnya
+            window.sudahBunyi = false;
         }
     }, 1000);
 
-    // Fitur Timer Display
+    // Fitur Timer
     function mulaiTimer() {
         clearInterval(interval);
         let jml = document.getElementById('jumlah').value;
         let totalDetik = jml * 9; 
         
         let target = new Date(new Date().getTime() + totalDetik * 1000);
-        document.getElementById('targetInfo').innerHTML = 
-            "Target selesai: " + target.getHours() + ":" + String(target.getMinutes()).padStart(2, '0');
+        document.getElementById('targetInfo').innerHTML = "Target selesai: " + target.getHours() + ":" + String(target.getMinutes()).padStart(2, '0');
 
         let sisa = totalDetik;
         interval = setInterval(() => {
             let m = Math.floor(sisa / 60);
             let s = sisa % 60;
-            document.getElementById('timerDisplay').innerHTML = 
-                String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
+            document.getElementById('timerDisplay').innerHTML = String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
             
             if (sisa === 5 || sisa <= 0) {
                 audioAlarm.play();

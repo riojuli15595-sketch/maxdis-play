@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timer Display Barang</title>
+    <title>Timer Display & Makdis</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
         .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -23,29 +23,32 @@
     
     <div id="timerDisplay">00:00</div>
     <div id="targetInfo">Target selesai: -</div>
+    <hr>
+    <div id="statusJadwal">Memantau jadwal Makdis...</div>
 </div>
 
 <script>
     let interval;
-    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Ganti 'alarm.mp3' dengan nama file Anda, pastikan file diupload di GitHub
+    let audioAlarm = new Audio('alarm.mp3'); 
+    
+    const jadwalMakdis = ["03:00", "09:00", "13:00", "17:00", "20:00"];
 
-    function bunyikanAlarm(tipe) {
-        let oscillator = audioCtx.createOscillator();
-        oscillator.connect(audioCtx.destination);
+    // Fitur Pengecekan Jam Makdis
+    setInterval(() => {
+        let sekarang = new Date();
+        let jamMenit = String(sekarang.getHours()).padStart(2, '0') + ":" + 
+                       String(sekarang.getMinutes()).padStart(2, '0');
         
-        if (tipe === 'peringatan') {
-            // Bunyi singkat 2 kali (untuk detik ke-5)
-            oscillator.frequency.value = 440;
-            oscillator.start();
-            setTimeout(() => oscillator.stop(), 200);
-        } else {
-            // Bunyi panjang (untuk detik ke-0)
-            oscillator.frequency.value = 880;
-            oscillator.start();
-            setTimeout(() => oscillator.stop(), 1500);
+        if (jadwalMakdis.includes(jamMenit)) {
+            if (sekarang.getSeconds() === 0) { // Bunyi tepat saat masuk jam tsb
+                alert("WAKTUNYA MAKDIS! Segera buka aplikasi.");
+                audioAlarm.play();
+            }
         }
-    }
+    }, 1000);
 
+    // Fitur Timer Display
     function mulaiTimer() {
         clearInterval(interval);
         let jml = document.getElementById('jumlah').value;
@@ -62,16 +65,10 @@
             document.getElementById('timerDisplay').innerHTML = 
                 String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
             
-            // Peringatan di detik ke-5
-            if (sisa === 5) {
-                bunyikanAlarm('peringatan');
+            if (sisa === 5 || sisa <= 0) {
+                audioAlarm.play();
             }
-            
-            // Selesai di detik ke-0
-            if (sisa <= 0) {
-                clearInterval(interval);
-                bunyikanAlarm('selesai');
-            }
+            if (sisa <= 0) clearInterval(interval);
             sisa--;
         }, 1000);
     }

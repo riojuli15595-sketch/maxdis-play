@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +9,9 @@
         body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
         .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         input { padding: 15px; width: 90%; font-size: 18px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 15px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button { padding: 15px 30px; font-size: 18px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn-mulai { background: #28a745; color: white; }
+        .btn-reset { background: #dc3545; color: white; }
         #timerDisplay { font-size: 60px; margin: 20px 0; font-weight: bold; color: #333; }
         #targetInfo { font-size: 18px; color: #666; margin-bottom: 20px; }
     </style>
@@ -19,7 +22,8 @@
     <h2>Timer Display</h2>
     <input type="number" id="jumlah" placeholder="Masukkan total barang">
     <br>
-    <button onclick="mulaiTimer()">Mulai Timer</button>
+    <button class="btn-mulai" onclick="mulaiTimer()">Mulai Timer</button>
+    <button class="btn-reset" onclick="resetAplikasi()">Reset</button>
     
     <div id="timerDisplay">00:00</div>
     <div id="targetInfo">Target selesai: -</div>
@@ -32,17 +36,12 @@
     let audioAlarm = new Audio('alarm.mp3'); 
     const jadwalMakdis = ["03:00", "09:00", "13:00", "17:00", "20:00"];
 
-    // Minta izin notifikasi saat aplikasi dibuka
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission();
-    }
+    // Izin Notifikasi
+    if (Notification.permission !== 'granted') { Notification.requestPermission(); }
 
     function kirimNotifikasi() {
         if (Notification.permission === 'granted') {
-            new Notification("WAKTUNYA MAKDIS!", {
-                body: "Segera buka aplikasi untuk mulai bekerja.",
-                icon: 'https://cdn-icons-png.flaticon.com/512/1090/1090956.png'
-            });
+            new Notification("WAKTUNYA MAKDIS!", { body: "Segera buka aplikasi untuk mulai bekerja.", icon: 'https://cdn-icons-png.flaticon.com/512/1090/1090956.png' });
         }
         audioAlarm.play();
     }
@@ -50,25 +49,18 @@
     // Pengecekan Jam Makdis
     setInterval(() => {
         let sekarang = new Date();
-        let jamMenit = String(sekarang.getHours()).padStart(2, '0') + ":" + 
-                       String(sekarang.getMinutes()).padStart(2, '0');
-        
+        let jamMenit = String(sekarang.getHours()).padStart(2, '0') + ":" + String(sekarang.getMinutes()).padStart(2, '0');
         if (jadwalMakdis.includes(jamMenit)) {
-            if (!window.sudahBunyi) {
-                kirimNotifikasi();
-                window.sudahBunyi = true;
-            }
-        } else {
-            window.sudahBunyi = false;
-        }
+            if (!window.sudahBunyi) { kirimNotifikasi(); window.sudahBunyi = true; }
+        } else { window.sudahBunyi = false; }
     }, 1000);
 
     // Fitur Timer
     function mulaiTimer() {
         clearInterval(interval);
         let jml = document.getElementById('jumlah').value;
+        if (!jml) return; // Mencegah input kosong
         let totalDetik = jml * 9; 
-        
         let target = new Date(new Date().getTime() + totalDetik * 1000);
         document.getElementById('targetInfo').innerHTML = "Target selesai: " + target.getHours() + ":" + String(target.getMinutes()).padStart(2, '0');
 
@@ -77,13 +69,18 @@
             let m = Math.floor(sisa / 60);
             let s = sisa % 60;
             document.getElementById('timerDisplay').innerHTML = String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
-            
-            if (sisa === 5 || sisa <= 0) {
-                audioAlarm.play();
-            }
+            if (sisa === 5 || sisa <= 0) { audioAlarm.play(); }
             if (sisa <= 0) clearInterval(interval);
             sisa--;
         }, 1000);
+    }
+
+    // Fitur Reset
+    function resetAplikasi() {
+        clearInterval(interval);
+        document.getElementById('timerDisplay').innerHTML = "00:00";
+        document.getElementById('jumlah').value = "";
+        document.getElementById('targetInfo').innerHTML = "Target selesai: -";
     }
 </script>
 </body>
